@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-
+use RealRashid\SweetAlert\Facades\Alert;
 
 class DashboardMenuController extends Controller
 {
@@ -137,6 +137,16 @@ class DashboardMenuController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $menu = Menu::select('gambar')->where('id', $id)->first();
+        Storage::delete($menu->gambar);
+        $isSuccess = Menu::destroy($id);
+
+        if ($isSuccess) {
+            Alert::success('Success', 'menu berhasil dihapus');
+            return redirect()->to('/admin/item');
+        } else {
+            Alert::error('Failed', 'menu gagal di hapus');
+            return redirect()->to('/admin/item');
+        }
     }
 }

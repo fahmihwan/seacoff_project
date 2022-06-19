@@ -9,8 +9,9 @@
 </head>
 
 <body>
-    <form action="/menu/payment/midtrans" id="submit_form" method="POST">
+    <form action="/menu/payment/midtrans" id="submit_form" method="POST" hidden>
         @csrf
+        <input type="text" name="name_order_json" id="name_json_callback" value="{{ $nameOrder }}">
         <input type="hidden" name="data_json" value="" id="json_callback">
         <input type="text" name="menu_json" value="" id="menu_json_callback">
     </form>

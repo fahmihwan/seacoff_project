@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DetailOrders;
+use App\Models\Event;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
-class DetailOrdersController extends Controller
+class DashboardEventController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,11 +15,10 @@ class DetailOrdersController extends Controller
      */
     public function index()
     {
-        // return view('/halaman/detailOrder', [
-        //     'orders' => 'wkwk'
-        // ]);
 
-        return DetailOrders::all();
+        return view('admin.pages.event.index', [
+            'events' => Event::all(),
+        ]);
     }
 
     /**
@@ -28,7 +28,7 @@ class DetailOrdersController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.pages.event.create');
     }
 
     /**
@@ -39,7 +39,24 @@ class DetailOrdersController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required',
+            'date' => '',
+            'image' => 'image|file|max:4096',
+            'description' => 'required',
+        ]);
+
+
+
+        $validated['image'] = $request->file('image');
+
+        if ($request->file('image')) {
+            $validated['image'] = $request->file('image')->store('acara-sea');
+        }
+
+        Event::create($validated);
+
+        return redirect()->to('/admin/event');
     }
 
     /**
@@ -61,7 +78,11 @@ class DetailOrdersController extends Controller
      */
     public function edit($id)
     {
-        //
+        // dd($id);
+        $event = Event::where('id', $id)->first();
+        return view('admin.pages.event.edit', [
+            'event' => $event
+        ]);
     }
 
     /**

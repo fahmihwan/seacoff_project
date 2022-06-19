@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Meja;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Ramsey\Uuid\Uuid;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class MejaController extends Controller
 {
@@ -16,11 +20,9 @@ class MejaController extends Controller
     {
         // $meja =  Meja::latest()->get();
 
-        // $var = 2;
-        // $enc = sha1($var);
-        // dd($enc);
-
-        return view('admin.pages.meja.index');
+        return view('admin.pages.meja.index', [
+            'qrcode' => Meja::latest()->get(),
+        ]);
     }
 
     /**
@@ -30,7 +32,8 @@ class MejaController extends Controller
      */
     public function create()
     {
-        //
+
+        return view('admin.pages.meja.create');
     }
 
     /**
@@ -41,7 +44,26 @@ class MejaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $qrcode =   Uuid::uuid4()->toString();
+        $currentDate = Carbon::now()->toDateString();
+        $validated = $request->validate([
+            'nama' => 'required',
+        ]);
+        $validated['qrcode'] = $qrcode . $currentDate;
+
+        Meja::create($validated);
+        return redirect()->to('/admin/setting/meja');
+
+
+
+
+        // $enkripsi = Crypt::encryptString($request->nama . $currentDate);
+        // $validated = $request->validate([
+        //     'nama' => 'required',
+        // ]);
+        // $validated['qrcode'] =  $enkripsi;  //URL HARUS DI UBAH
+
     }
 
     /**
@@ -50,9 +72,13 @@ class MejaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    // public function show($id)
+    public function show(Meja $meja)
     {
-        //
+
+        return view('admin.pages.meja.show', [
+            'meja' => $meja,
+        ]);
     }
 
     /**
@@ -86,6 +112,15 @@ class MejaController extends Controller
      */
     public function destroy($id)
     {
-        //
+
+        $isSuccess = Meja::destroy($id);
+
+        if ($isSuccess) {
+            Alert::success('Success', 'meja berhasil di hapus');
+            return redirect()->to('/admin/setting/meja');
+        } else {
+            Alert::error('Failed', 'meja berhasil di hapus');
+            return redirect()->to('/admin/setting/meja');
+        }
     }
 }

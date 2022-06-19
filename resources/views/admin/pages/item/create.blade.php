@@ -21,12 +21,12 @@
                 </p>
                 <form action="/admin/item" class="forms-sample" method="post" enctype="multipart/form-data">
                     @csrf
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <label for="menu">Menu Baru</label>
                         <input type="text" class="form-control" id="menu" name="nama" autocomplete="off"
-                            placeholder="Name">
+                            placeholder="menu baru">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <label for="kategori">Kategori</label>
                         <select class="form-control" id="kategori" name="kategori">
                             <option selected>Pilih kategori menu</option>
@@ -36,12 +36,12 @@
                             <option value="food">food</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <label for="harga">Harga</label>
-                        <input type="number" class="form-control" id="harga" placeholder="Name" name="harga"
+                        <input type="number" class="form-control" id="harga" placeholder="Harga" name="harga"
                             autocomplete="off">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mb-3">
                         <label>upload foto</label>
                         <div class="input-group col-xs-12">
                             <input type="file" class="form-control file-upload-info" onChange="previewImage()"
@@ -53,7 +53,7 @@
                 </form>
             </div>
         </div>
-        <div class="card float-end ms-sm-0 ms-md-3 mt-sm-3 mt-md-3 mt-lg-0 " style="width:500px">
+        <div class="box-img card float-end ms-sm-0 ms-md-3 mt-sm-3 mt-md-3 mt-lg-0 " style="width:500px">
             <div class="card-body ">
                 <div style="border: 5px solid rgb(221, 221, 221); border-style: dashed; padding:5px">
                     <img src="" class="img-preview img-fluid" width="400px" height="400px">
@@ -66,15 +66,18 @@
 
 @section('script')
     <script>
+        const image = document.querySelector('#image');
+        const imgPreview = document.querySelector('.img-preview');
+        const boxImg = document.getElementsByClassName('box-img')[0]
+
+
+
         function previewImage() {
-            const image = document.querySelector('#image');
-            const imgPreview = document.querySelector('.img-preview');
 
             imgPreview.style.display = 'block'
 
             const dataUrl = URL.createObjectURL(image.files[0]); //<-- cara gampang preview IMG
             imgPreview.src = dataUrl
-
         }
     </script>
 @endsection

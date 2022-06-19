@@ -74,23 +74,24 @@
             border-radius: 12px;
             box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
         }
-
     </style>
 </head>
 
 <body class="text-center  d-flex justify-content-center ">
     {{-- <main class="form-signin"> --}}
     <main class="cards">
-        <form class="m-5">
+        <form class="m-5" method="post" action="/">
+            @csrf
             <img class="mb-4" src="{{ asset('assets/images/sea_coff-logo.jpeg') }}" alt="" height="57">
             <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
 
             <div class="form-floating">
-                <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-                <label for="floatingInput">Email address</label>
+                <input type="username" name="username" class="form-control" id="floatingInput" placeholder="username">
+                <label for="floatingInput">Username</label>
             </div>
             <div class="form-floating">
-                <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
+                <input type="password" name="password" class="form-control" id="floatingPassword"
+                    placeholder="Password">
                 <label for="floatingPassword">Password</label>
             </div>
             <div class="checkbox mb-3">

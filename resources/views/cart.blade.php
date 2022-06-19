@@ -26,7 +26,7 @@
 <div class="row mt-2">
     <div class="col-md-12" style="background-color: white">
         <span class="text-muted">Tempat</span>
-        <h5>Meja nomer 5</h5>
+        <h5>{{ $meja }}</h5>
         <span class="text-muted " style="font-size: 10px">
             <p>cek status pesanan di buat. dan tunggu hingga waiters
                 menganterkan pesanan and</p>
@@ -63,7 +63,8 @@
         <div class="d-grid gap-2 mb-3">
             <form action="/menu/payment/" method="POST" id="send_json">
                 @csrf
-                <input type="hidden" value="" name="json" id="json_callback">
+                <input type="text" value="" name="json_name" id="json_order_name">
+                <input type="text" value="" name="json_menu" id="json_callback">
                 <button class=" btn btn-danger btn-sm " type=" button" id="pay-button" style="width: 100%;">Pesan
                     Sekarang!</button>
             </form>
@@ -74,10 +75,12 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function(event) {
         let orderList = JSON.parse(sessionStorage.getItem("order-list"));
         const detailPesanan = document.getElementById('detail-pesanan')
+        const payButton = document.getElementById('pay-button');
 
         loadData()
 
@@ -213,8 +216,6 @@
             }
             sessionStorage.setItem('detailOrder-list', JSON.stringify(dataJson))
 
-
-
             dataJson.push({
                 name: "Tax",
                 price: parseInt(ppn.innerText.slice(2).replace(/[Rp.]+/g, '')),
@@ -239,13 +240,30 @@
             totalPrice.innerText = 'Rp' + totalWithPPN
         }
 
+
         const form = document.getElementById('send_json');
-        const inputJson = document.getElementById('json_callback');
-        form.addEventListener('submit', function(e) {
-            summaryOrders()
+        const orderName = document.getElementById('json_order_name');
+        payButton.addEventListener('click', function(e) {
+            e.preventDefault()
+            Swal.fire({
+                title: 'nama pemesan',
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'simpan',
+                cancelButtonText: 'batal',
+                showLoaderOnConfirm: true,
+                preConfirm: (login) => {
+                    orderName.value = login
+                    summaryOrders()
+                    form.submit()
+                },
+            })
+
+
         })
-
-
 
 
 

@@ -7,22 +7,32 @@ use App\Models\Order;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use PhpParser\Node\Stmt\Return_;
 
 class MenuPaymentController extends Controller
 {
     public function index()
     {
-        return view('cart');
+        return view('cart', [
+            'meja' => Session::get('meja')->nama
+        ]);
     }
 
     public function payment(Request $request)
     {
-        $json = json_decode($request->json, true);
-        $gross_amount = end($json)['gross_amount'];
-        array_pop($json);
 
-        // dd($json);
+        // $request
+
+        // $json_name = json_decode($request->json_name, true);
+        // dd($json_name);
+
+        $json_menu = json_decode($request->json_menu, true);
+        $gross_amount = end($json_menu)['gross_amount'];
+        array_pop($json_menu);
+
+
+        // dd($json_menu);
         // Set your Merchant Server Key
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
         // Set to Development/Sandbox Environment (default). Set to true for Production Environment (accept real transaction).
@@ -37,7 +47,7 @@ class MenuPaymentController extends Controller
                 'order_id' => rand(),
                 'gross_amount' => $gross_amount,
             ),
-            "item_details" => $json,
+            "item_details" => $json_menu,
             "enabled_payments" => [
                 "gopay",
                 "shopeepay",
@@ -51,32 +61,45 @@ class MenuPaymentController extends Controller
                 "bca_klikpay",
                 "bri_epay",
                 "akulaku"
-            ]
-            // 'customer_details' => array(
-            //     'first_name' => 'budi',
-            //     'last_name' => 'pratama',
-            //     'email' => 'budi.pra@example.com',
-            //     'phone' => '08111222333',
-            // ),
+            ],
+            'customer_details' => array(
+                'first_name' => $request->json_name
+
+            ),
         );
         $snapToken = \Midtrans\Snap::getSnapToken($params);
 
         return view('midtrans', [
-            'snapToken' => $snapToken
+            'snapToken' => $snapToken,
+            'nameOrder' => $request->json_name
         ]);
     }
 
     public function payment_post(Request $request)
     {
 
+
         $menuJson = json_decode($request->menu_json, true);
         $midtransJson = json_decode($request->data_json, true);
-
+        $meja_id = Session::get('meja')->id;
         DB::beginTransaction();
         try {
 
+            $notaDB = DetailOrders::select('nota')->latest()->first();
+            if ($notaDB == null) {
+                $nota = 'SC' . date('m') . '-' . date('Y') . '0001' . date('d') . 'E';
+            } elseif (substr($notaDB->nota, 2, 2) != date('m')) {
+                $nota = 'SC' . date('m') . '-' . date('Y') . '0001' . date('d') . 'E';
+            } else {
+                $cut =  substr($notaDB->nota, 10, -3);
+                $number = str_pad($cut + 1, 4, "0", STR_PAD_LEFT);;
+                $nota = 'SC' . date('m') . '-' . date('Y') . $number . date('d') . 'E';
+            }
+
             $detailOrder =  DetailOrders::create([
-                'meja_id' => 1,
+                'nota' => $nota,
+                'nama' => $request->name_order_json,
+                'meja_id' => $meja_id,
                 'status_pemesanan' => 'order',
                 'status_pembayaran' => $midtransJson['transaction_status'],
                 'id_transaksi' => $midtransJson['transaction_id'],
@@ -91,7 +114,7 @@ class MenuPaymentController extends Controller
                 Order::create([
                     'detail_orders_id' => $detailOrder->id,
                     'menu_id' => $menu['id'],
-                    'meja_id' => 1,
+                    'meja_id' => $meja_id,
                     'qty' => $menu['quantity'],
                 ]);
             }
@@ -100,5 +123,7 @@ class MenuPaymentController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
         }
+
+        return redirect()->to('/home/my-order');
     }
 }
